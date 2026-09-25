@@ -87,7 +87,7 @@
   "config/group-test-urls": "[]",
   "config/proxy-folders": "{\"folders\":[{\"id\":\"builtin-strategy\",\"name\":\"folder_builtin_strategy\",\"order\":0,\"rules\":[{\"type\":\"auto\",\"value\":\"hasGroup\"}],\"manualIncludes\":[]},{\"id\":\"builtin-nodes\",\"name\":\"folder_builtin_nodes\",\"order\":1,\"rules\":[{\"type\":\"auto\",\"value\":\"nodeOnly\"}],\"manualIncludes\":[]}],\"activeId\":\"__all__\",\"seeded\":true}",
   "config/icon-reflect-list": "[]",
-  "config/speedtest-url": "https://captive.apple.com",
+  "config/speedtest-url": "https://cp.cloudflare.com/generate_204",
   "config/dark-theme": "custom",
   "config/quick-filter-enabled": "false",
   "config/independent-latency-test": "true",
