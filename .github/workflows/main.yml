@@ -1,0 +1,76 @@
+name: Weekly Release
+
+on:
+  schedule:
+    # Every Monday at 05:00 Beijing time (UTC+8)
+    - cron: "0 21 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create Weekly Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Generate release tag
+        id: release
+        shell: bash
+        run: |
+          echo "tag=$(TZ=Asia/Shanghai date +'%y.%m.%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Check existing release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release $TAG already exists. Skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Package repository
+        if: steps.check.outputs.exists == 'false'
+        shell: bash
+        run: |
+          git archive \
+            --format=zip \
+            --prefix=L1l1th/ \
+            -o "$RUNNER_TEMP/L1l1th.zip" \
+            HEAD
+
+          git archive \
+            --format=tar.gz \
+            --prefix=L1l1th/ \
+            -o "$RUNNER_TEMP/L1l1th.tar.gz" \
+            HEAD
+
+      - name: Publish release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        shell: bash
+        run: |
+          gh release create "$TAG" \
+            "$RUNNER_TEMP/L1l1th.zip" \
+            "$RUNNER_TEMP/L1l1th.tar.gz" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --notes "Weekly configuration snapshot for $TAG."
